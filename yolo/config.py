@@ -24,7 +24,11 @@ CLASSES = ['aeroplane', 'bicycle', 'bird', 'boat', 'bottle', 'bus',
 
 FLIPPED = True
 
-
+#
+# carplane dataset parameter
+#
+CARPLANE_PATH = os.path.join((DATA_PATH, 'carplane'))
+CARPLANE_CLASSES = ['plane', 'car']
 #
 # model parameter
 #

@@ -8,12 +8,13 @@ slim = tf.contrib.slim
 class YOLONet(object):
 
     def __init__(self, is_training=True):
-        self.classes = cfg.CLASSES
+        self.classes = cfg.CARPLANE_CLASSES
         self.num_class = len(self.classes)
         self.image_size = cfg.IMAGE_SIZE
         self.cell_size = cfg.CELL_SIZE
         self.boxes_per_cell = cfg.BOXES_PER_CELL
-        self.output_size = (self.cell_size * self.cell_size) * (self.num_class + self.boxes_per_cell * 5)
+        ##self.output_size = (self.cell_size * self.cell_size) * (self.num_class + self.boxes_per_cell * 5)
+        self.output_size = (self.cell_size * self. cell_size) * (self.num_class + self.boxes_per_cell * 9)
         self.scale = 1.0 * self.image_size / self.cell_size
         self.boundary1 = self.cell_size * self.cell_size * self.num_class
         self.boundary2 = self.boundary1 + self.cell_size * self.cell_size * self.boxes_per_cell
@@ -25,7 +26,7 @@ class YOLONet(object):
 
         self.learning_rate = cfg.LEARNING_RATE
         self.batch_size = cfg.BATCH_SIZE
-        self.alpha = cfg.ALPHA
+        self.alpha = cfg.ALPHA  #?
 
         self.offset = np.transpose(np.reshape(np.array(
             [np.arange(self.cell_size)] * self.cell_size * self.boxes_per_cell),
@@ -35,7 +36,7 @@ class YOLONet(object):
         self.logits = self.build_network(self.images, num_outputs=self.output_size, alpha=self.alpha, is_training=is_training)
 
         if is_training:
-            self.labels = tf.placeholder(tf.float32, [None, self.cell_size, self.cell_size, 5 + self.num_class])
+            self.labels = tf.placeholder(tf.float32, [None, self.cell_size, self.cell_size, 9 + self.num_class])
             self.loss_layer(self.logits, self.labels)
             self.total_loss = tf.losses.get_total_loss()
             tf.summary.scalar('total_loss', self.total_loss)
@@ -100,6 +101,8 @@ class YOLONet(object):
         Return:
           iou: 3-D tensor [CELL_SIZE, CELL_SIZE, BOXES_PER_CELL]
         """
+        ##TODO(dingjian) calculate the iou of two 4 dots poly
+
         with tf.variable_scope(scope):
             boxes1 = tf.stack([boxes1[:, :, :, :, 0] - boxes1[:, :, :, :, 2] / 2.0,
                                boxes1[:, :, :, :, 1] - boxes1[:, :, :, :, 3] / 2.0,
@@ -135,7 +138,7 @@ class YOLONet(object):
         with tf.variable_scope(scope):
             predict_classes = tf.reshape(predicts[:, :self.boundary1], [self.batch_size, self.cell_size, self.cell_size, self.num_class])
             predict_scales = tf.reshape(predicts[:, self.boundary1:self.boundary2], [self.batch_size, self.cell_size, self.cell_size, self.boxes_per_cell])
-            predict_boxes = tf.reshape(predicts[:, self.boundary2:], [self.batch_size, self.cell_size, self.cell_size, self.boxes_per_cell, 4])
+            predict_boxes = tf.reshape(predicts[:, self.boundary2:], [self.batch_size, self.cell_size, self.cell_size, self.boxes_per_cell, 8])
 
             response = tf.reshape(labels[:, :, :, 0], [self.batch_size, self.cell_size, self.cell_size, 1])
             boxes = tf.reshape(labels[:, :, :, 1:5], [self.batch_size, self.cell_size, self.cell_size, 1, 4])

@@ -1,0 +1,30 @@
+ALPHA: 0.1
+BATCH_SIZE: 45
+BOXES_PER_CELL: 2
+CACHE_PATH: data/pascal_voc/cache
+CARPLANE_CLASSES: ['plane', 'car']
+CARPLANE_PATH: /home/dingjian/code/yolo_tensorflow/data/carplane
+CELL_SIZE: 7
+CLASSES: ['aeroplane', 'bicycle', 'bird', 'boat', 'bottle', 'bus', 'car', 'cat', 'chair', 'cow', 'diningtable', 'dog', 'horse', 'motorbike', 'person', 'pottedplant', 'sheep', 'sofa', 'train', 'tvmonitor']
+CLASS_SCALE: 2.0
+COORD_SCALE: 5.0
+DATA_PATH: data
+DECAY_RATE: 0.1
+DECAY_STEPS: 30000
+DISP_CONSOLE: False
+FLIPPED: True
+GPU: 
+IMAGE_SIZE: 448
+IOU_THRESHOLD: 0.5
+LEARNING_RATE: 0.0001
+MAX_ITER: 15000
+NOOBJECT_SCALE: 1.0
+OBJECT_SCALE: 1.0
+OUTPUT_DIR: data/pascal_voc/output
+PASCAL_PATH: data/pascal_voc
+SAVE_ITER: 1000
+STAIRCASE: True
+SUMMARY_ITER: 10
+THRESHOLD: 0.2
+WEIGHTS_DIR: data/pascal_voc/weights
+WEIGHTS_FILE: data/pascal_voc/weights/YOLO_small.ckpt

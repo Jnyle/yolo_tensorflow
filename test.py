@@ -14,7 +14,7 @@ class Detector(object):
         self.net = net
         self.weights_file = weight_file
 
-        self.classes = cfg.CLASSES
+        self.classes = cfg.CARPLANE_CLASSES
         self.num_class = len(self.classes)
         self.image_size = cfg.IMAGE_SIZE
         self.cell_size = cfg.CELL_SIZE

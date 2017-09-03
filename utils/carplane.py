@@ -5,19 +5,21 @@ import cv2
 import cPickle
 import copy
 import yolo.config as cfg
-
+from GetFileFromDir import GetFileFromThisRootDir
 
 ##TODO(dingjian) all path need changes
 
-class pascal_voc(object):
+class carplane(object):
     def __init__(self, phase, rebuild=False):
-        self.devkil_path = os.path.join(cfg.CARPLANE_PATH, 'VOCdevkit')
-        self.data_path = os.path.join(self.devkil_path, 'VOC2007')
-        self.cache_path = cfg.CACHE_PATH
+        ##self.devkil_path = os.path.join(cfg.CARPLANE_PATH, 'VOCdevkit')
+        ##self.data_path = os.path.join(cfg.CARPLANE_PATH)
+        print cfg.CARPLANE_PATH
+        self.data_path = cfg.CARPLANE_PATH
+        ##self.cache_path = cfg.CACHE_PATHf
         self.batch_size = cfg.BATCH_SIZE
         self.image_size = cfg.IMAGE_SIZE
         self.cell_size = cfg.CELL_SIZE
-        self.classes = cfg.CLASSES
+        self.classes = cfg.CARPLANE_CLASSES
         self.class_to_ind = dict(zip(self.classes, xrange(len(self.classes))))
         self.flipped = cfg.FLIPPED
         self.phase = phase  ## phase indicate if 'train' or 'test'
@@ -72,38 +74,41 @@ class pascal_voc(object):
         return gt_labels
 
     def load_labels(self):
-        cache_file = os.path.join(self.cache_path, 'pascal_' + self.phase + '_gt_labels.pkl')
+        ##cache_file = os.path.join(self.cache_path, 'pascal_' + self.phase + '_gt_labels.pkl')
 
-        if os.path.isfile(cache_file) and not self.rebuild:
-            print('Loading gt_labels from: ' + cache_file)
-            with open(cache_file, 'rb') as f:
-                gt_labels = cPickle.load(f)
-            return gt_labels
+        # if os.path.isfile(cache_file) and not self.rebuild:
+        #     print('Loading gt_labels from: ' + cache_file)
+        #     with open(cache_file, 'rb') as f:
+        #         gt_labels = cPickle.load(f)
+        #     return gt_labels
 
         print('Processing gt_labels from: ' + self.data_path)
 
-        if not os.path.exists(self.cache_path):
-            os.makedirs(self.cache_path)
+        # if not os.path.exists(self.cache_path):
+        #     os.makedirs(self.cache_path)
 
         if self.phase == 'train':
-            txtname = os.path.join(self.data_path, 'ImageSets', 'Main',
-                                   'trainval.txt')
+            txtname = os.path.join(self.data_path, 'trainval',
+                                 'train.txt')
+
         else:
-            txtname = os.path.join(self.data_path, 'ImageSets', 'Main',
+            txtname = os.path.join(self.data_path, 'test',
                                    'test.txt')
         with open(txtname, 'r') as f:
             self.image_index = [x.strip() for x in f.readlines()]
 
         gt_labels = []
+
+
         for index in self.image_index:
             label, num = self.load_pascal_annotation(index)
             if num == 0:
                 continue
-            imname = os.path.join(self.data_path, 'JPEGImages', index + '.jpg')
+            imname = os.path.join(self.data_path, 'images', index + '.png')
             gt_labels.append({'imname': imname, 'label': label, 'flipped': False})
-        print('Saving gt_labels to: ' + cache_file)
-        with open(cache_file, 'wb') as f:
-            cPickle.dump(gt_labels, f)
+        # print('Saving gt_labels to: ' + cache_file)
+        # with open(cache_file, 'wb') as f:
+        #     cPickle.dump(gt_labels, f)
         return gt_labels
 
     def load_pascal_annotation(self, index):
@@ -111,36 +116,52 @@ class pascal_voc(object):
         Load image and bounding boxes info from XML file in the PASCAL VOC
         format.
         """
+        imname = os.path.join(self.data_path, 'images', index + '.png')
 
-        imname = os.path.join(self.data_path, 'JPEGImages', index + '.png')
         im = cv2.imread(imname)
         h_ratio = 1.0 * self.image_size / im.shape[0]
         w_ratio = 1.0 * self.image_size / im.shape[1]
         # im = cv2.resize(im, [self.image_size, self.image_size])
 
         label = np.zeros((self.cell_size, self.cell_size, 9 + 2))
-        filename = os.path.join(self.data_path, 'Annotations', index + '.xml')
-        tree = ET.parse(filename)
-        objs = tree.findall('object')
+        filename = os.path.join(self.data_path, 'labelTxt', index + '.txt')
+        #tree = ET.parse(filename)
+        #objs = tree.findall('object')
 
-        for obj in objs:
-            bbox = obj.find('bndbox')
+        f = open(filename, 'r')
+        lines = f.readlines()
+        lines = [x.strip() for x in lines]
+
+        index1 = 0
+        for obj in lines:
+
+            #print obj
+            split = obj.split('\t')
+            ##bbox = obj.find('bndbox')
             # Make pixel indexes 0-based
+            ## TODO(dingjian) figure out the max,min
             # x1 = max(min((float(bbox.find('xmin').text) - 1) * w_ratio, self.image_size - 1), 0)
             # y1 = max(min((float(bbox.find('ymin').text) - 1) * h_ratio, self.image_size - 1), 0)
             # x2 = max(min((float(bbox.find('xmax').text) - 1) * w_ratio, self.image_size - 1), 0)
             # y2 = max(min((float(bbox.find('ymax').text) - 1) * h_ratio, self.image_size - 1), 0)
-            x1 = ''
-            y1 = ''
-            x2 = ''
-            y2 = ''
-            x3 = ''
-            y3 = ''
-            x4 = ''
-            y4 = ''
+            # if (index1 < 10):
+            #     print split
+            bbox = [float(x.split('e+')[0]) * pow(10, int(x.split('e+')[1]) ) if (len(x.split('e+')) == 2) else float(x) for x in split]
+            # if (index1 < 10):
+            #     print bbox
+            index1 = index1 + 1
+            x1 = max(min((float(bbox[0]) - 1) * w_ratio, self.image_size - 1), 0)
+            y1 = max(min((float(bbox[1]) - 1) * h_ratio, self.image_size - 1), 0)
+            x2 = max(min((float(bbox[2]) - 1) * w_ratio, self.image_size - 1), 0)
+            y2 = max(min((float(bbox[3]) - 1) * h_ratio, self.image_size - 1), 0)
+            x3 = max(min((float(bbox[4]) - 1) * w_ratio, self.image_size - 1), 0)
+            y3 = max(min((float(bbox[5]) - 1) * h_ratio, self.image_size - 1), 0)
+            x4 = max(min((float(bbox[6]) - 1) * w_ratio, self.image_size - 1), 0)
+            y4 = max(min((float(bbox[7]) - 1) * h_ratio, self.image_size - 1), 0)
 
-
-            cls_ind = self.class_to_ind[obj.find('name').text.lower().strip()]
+            classname = index.split('_')[1]
+            cls_ind = self.class_to_ind[classname]
+            #cls_ind = self.class_to_ind[obj.find('name').text.lower().strip()]
             ##boxes = [(x2 + x1) / 2.0, (y2 + y1) / 2.0, x2 - x1, y2 - y1]
             boxes = [x1, y1, x2, y2, x3, y3, x4, y4]
             ## the cell id
@@ -154,4 +175,4 @@ class pascal_voc(object):
             label[y_ind, x_ind, 1:9] = boxes
             label[y_ind, x_ind, 9 + cls_ind] = 1
 
-        return label, len(objs)
+        return label, len(lines)

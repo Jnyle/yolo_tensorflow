@@ -6,7 +6,7 @@ import yolo.config as cfg
 from yolo.yolo_net import YOLONet
 from utils.timer import Timer
 from utils.pascal_voc import pascal_voc
-
+from utils.carplane import carplane
 
 class Solver(object):
 
@@ -145,14 +145,16 @@ def main():
         cfg.GPU = args.gpu
 
     if args.data_dir != cfg.DATA_PATH:
-        update_config_paths(args.data_dir, args.weights)
+        print 'the data path maybe some wrong'
+        ##update_config_paths(args.data_dir, args.weights)
 
     os.environ['CUDA_VISIBLE_DEVICES'] = cfg.GPU
 
     yolo = YOLONet()
-    pascal = pascal_voc('train')
+    ##pascal = pascal_voc('train')
+    carplane_data = carplane('train')
 
-    solver = Solver(yolo, pascal)
+    solver = Solver(yolo, carplane_data)
 
     print('Start training ...')
     solver.train()

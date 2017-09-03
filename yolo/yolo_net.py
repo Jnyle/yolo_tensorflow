@@ -1,6 +1,9 @@
 import numpy as np
 import tensorflow as tf
 import yolo.config as cfg
+##from shapely.geometry import *
+from sympy.geometry import *
+
 
 slim = tf.contrib.slim
 
@@ -26,7 +29,7 @@ class YOLONet(object):
 
         self.learning_rate = cfg.LEARNING_RATE
         self.batch_size = cfg.BATCH_SIZE
-        self.alpha = cfg.ALPHA  #?
+        self.alpha = cfg.ALPHA  #parameter for leaky relu
 
         self.offset = np.transpose(np.reshape(np.array(
             [np.arange(self.cell_size)] * self.cell_size * self.boxes_per_cell),
@@ -101,7 +104,7 @@ class YOLONet(object):
         Return:
           iou: 3-D tensor [CELL_SIZE, CELL_SIZE, BOXES_PER_CELL]
         """
-        ##TODO(dingjian) calculate the iou of two 4 dots poly
+        ### boxes1, predict_boxes_tran
 
         with tf.variable_scope(scope):
             boxes1 = tf.stack([boxes1[:, :, :, :, 0] - boxes1[:, :, :, :, 2] / 2.0,
@@ -130,47 +133,152 @@ class YOLONet(object):
             square2 = (boxes2[:, :, :, :, 2] - boxes2[:, :, :, :, 0]) * \
                 (boxes2[:, :, :, :, 3] - boxes2[:, :, :, :, 1])
 
+
+
             union_square = tf.maximum(square1 + square2 - inter_square, 1e-10)
 
         return tf.clip_by_value(inter_square / union_square, 0.0, 1.0)
+    def calc_iou_poly(self, boxes1, boxes2, scope='iou_poly'):
 
+
+        with tf.variable_scope(scope):
+            boxes1 = tf.stack([boxes1[:, :, :, :, 0],
+                               boxes1[:, :, :, :, 1],
+                               boxes1[:, :, :, :, 6],
+                               boxes1[:, :, :, :, 7]])
+            boxes1 = tf.transpose(boxes1, [1, 2, 3, 4, 0])
+
+            boxes2 = tf.stack([boxes2[:, :, :, :, 0],
+                               boxes2[:, :, :, :, 1],
+                               boxes2[:, :, :, :, 6],
+                               boxes2[:, :, :, :, 7]])
+            boxes2 = tf.transpose(boxes2, [1, 2, 3, 4, 0])
+
+            # calculate the left up point & right down point
+            lu = tf.maximum(boxes1[:, :, :, :, :2], boxes2[:, :, :, :, :2])
+            rd = tf.minimum(boxes1[:, :, :, :, 2:], boxes2[:, :, :, :, 2:])
+
+            # intersection
+            intersection = tf.maximum(0.0, rd - lu)
+            inter_square = intersection[:, :, :, :, 0] * intersection[:, :, :, :, 1]
+
+            # calculate the boxs1 square and boxs2 square
+            square1 = (boxes1[:, :, :, :, 2] - boxes1[:, :, :, :, 0]) * \
+                (boxes1[:, :, :, :, 3] - boxes1[:, :, :, :, 1])
+            square2 = (boxes2[:, :, :, :, 2] - boxes2[:, :, :, :, 0]) * \
+                (boxes2[:, :, :, :, 3] - boxes2[:, :, :, :, 1])
+
+
+
+            union_square = tf.maximum(square1 + square2 - inter_square, 1e-10)
+
+        return tf.clip_by_value(inter_square / union_square, 0.0, 1.0)
+    # def calc_iou_poly(self, boxes1, boxes2, scope='iou_poly'):
+    #     ##TODO(dingjian) calculate the iou of two 4 dots poly
+    #     iou = np.zeros((self.batch_size, self.cell_size, self.cell_size, self.boxes_per_cell))
+    #     for i in range(self.batch_size):
+    #         for j in range(self.cell_size):
+    #             for k in range(self.cell_size):
+    #                 for t in range(self.boxes_per_cell):
+    #                     box1 = boxes1[i, j, k, t, :]
+    #                     box2 = boxes2[i, j, k, t, :]
+    #                     print box1
+    #                     print box2
+    #                     point = Point(box1[0], box1[1])
+    #                     print point
+    #                     p1, p2, p3, p4 = map(Point, [(box1[0], box1[1]), (box1[2], box1[3]), (box1[4], box1[5]), (box1[6], box1[7])])
+    #                     poly1 = Polygon(p1, p2, p3, p4)
+    #                     p5, p6, p7, p8 = map(Point, [(box2[0], box2[1]), (box2[2], box2[3]), (box2[4], box2[5]), (box2[6], box2[7])])
+    #                     poly2 = Polygon(p5, p6, p7, p8)
+    #                     poly1.intersection(poly2)
+    #
+    #                     intersect = poly1.intersection(poly2)
+    #                     if (len(intersect) == 3):
+    #                         interpoly = Polygon(intersect[0], intersect[1], intersect[2])
+    #                     elif (len(intersect) == 4):
+    #                         interpoly = Polygon(intersect[0], intersect[1], intersect[2], intersect[3])
+    #                     elif (len(intersect) == 5):
+    #                         interpoly = Polygon(intersect[0], intersect[1], intersect[2], intersect[3], intersect[4])
+    #                     elif (len(intersect) == 6):
+    #                         interpoly = Polygon(intersect[0], intersect[1], intersect[2], intersect[3], intersect[4], intersect[5])
+    #                     elif (len(intersect) == 7):
+    #                         interpoly = Polygon(intersect[0], intersect[1], intersect[2], intersect[3], intersect[4], intersect[5], intersect[6])
+    #                     elif (len(intersect) == 8):
+    #                         interpoly = Polygon(intersect[0], intersect[1], intersect[2], intersect[3], intersect[4], intersect[5], intersect[6], intersect[7])
+    #                     inter_square = interpoly.area
+    #                     union_square = tf.maximum(poly1.area + poly2.area - inter_square, 1e-10)
+    #                     iou[i][j][k][t] = tf.clip_by_value(inter_square / union_square, 0.0, 1.0)
+    #     return iou
     def loss_layer(self, predicts, labels, scope='loss_layer'):
         with tf.variable_scope(scope):
+
+            ## [batch_size, y_cell_size, x_cell_size, boxes_per_cell, boxes + class]
             predict_classes = tf.reshape(predicts[:, :self.boundary1], [self.batch_size, self.cell_size, self.cell_size, self.num_class])
             predict_scales = tf.reshape(predicts[:, self.boundary1:self.boundary2], [self.batch_size, self.cell_size, self.cell_size, self.boxes_per_cell])
             predict_boxes = tf.reshape(predicts[:, self.boundary2:], [self.batch_size, self.cell_size, self.cell_size, self.boxes_per_cell, 8])
 
             response = tf.reshape(labels[:, :, :, 0], [self.batch_size, self.cell_size, self.cell_size, 1])
-            boxes = tf.reshape(labels[:, :, :, 1:5], [self.batch_size, self.cell_size, self.cell_size, 1, 4])
+            #boxes = tf.reshape(labels[:, :, :, 1:5], [self.batch_size, self.cell_size, self.cell_size, 1, 4])
+            boxes = tf.reshape(labels[:, :, :, 1:9], [self.batch_size, self.cell_size, self.cell_size, 1, 8])
             boxes = tf.tile(boxes, [1, 1, 1, self.boxes_per_cell, 1]) / self.image_size
-            classes = labels[:, :, :, 5:]
+            classes = labels[:, :, :, 9:]
 
             offset = tf.constant(self.offset, dtype=tf.float32)
             offset = tf.reshape(offset, [1, self.cell_size, self.cell_size, self.boxes_per_cell])
             offset = tf.tile(offset, [self.batch_size, 1, 1, 1])
-            predict_boxes_tran = tf.stack([(predict_boxes[:, :, :, :, 0] + offset) / self.cell_size,
-                                           (predict_boxes[:, :, :, :, 1] + tf.transpose(offset, (0, 2, 1, 3))) / self.cell_size,
-                                           tf.square(predict_boxes[:, :, :, :, 2]),
-                                           tf.square(predict_boxes[:, :, :, :, 3])])
+            # predict_boxes_tran = tf.stack([(predict_boxes[:, :, :, :, 0] + offset) / self.cell_size,  ##offset determined by y
+            #                                (predict_boxes[:, :, :, :, 1] + tf.transpose(offset, (0, 2, 1, 3))) / self.cell_size, ##offset determined by x
+            #                                tf.square(predict_boxes[:, :, :, :, 2]),
+            #                                tf.square(predict_boxes[:, :, :, :, 3])])
+
+            ### for 4 dots
+            predict_boxes_tran = tf.stack([(predict_boxes[:, :, :, :, 0] + offset) / self.cell_size,  ##offset determined by y
+                                           (predict_boxes[:, :, :, :, 1] + tf.transpose(offset, (0, 2, 1, 3))) / self.cell_size, ##offset determined by x
+                                           (predict_boxes[:, :, :, :, 2] + offset) / self.cell_size,
+                                           (predict_boxes[:, :, :, :, 3] + tf.transpose(offset, (0, 2, 1, 3))) / self.cell_size,
+                                           (predict_boxes[:, :, :, :, 4] + offset) / self.cell_size,
+                                           (predict_boxes[:, :, :, :, 5] + tf.transpose(offset, (0, 2, 1, 3))) / self.cell_size,
+                                           (predict_boxes[:, :, :, :, 6] + offset) / self.cell_size,
+                                           (predict_boxes[:, :, :, :, 7] + tf.transpose(offset, (0, 2, 1, 3))) / self.cell_size,
+                                           ])
+
+            ### [batch_size, y_cell_size, x_cell_size, boxes_per_cell, boxes + class]
             predict_boxes_tran = tf.transpose(predict_boxes_tran, [1, 2, 3, 4, 0])
 
-            iou_predict_truth = self.calc_iou(predict_boxes_tran, boxes)
+            #iou_predict_truth = self.calc_iou(predict_boxes_tran, boxes)
+
+
+            iou_predict_truth = self.calc_iou_poly(predict_boxes_tran, boxes)
 
             # calculate I tensor [BATCH_SIZE, CELL_SIZE, CELL_SIZE, BOXES_PER_CELL]
             object_mask = tf.reduce_max(iou_predict_truth, 3, keep_dims=True)
+
+
             object_mask = tf.cast((iou_predict_truth >= object_mask), tf.float32) * response
 
             # calculate no_I tensor [CELL_SIZE, CELL_SIZE, BOXES_PER_CELL]
             noobject_mask = tf.ones_like(object_mask, dtype=tf.float32) - object_mask
 
+
+
+            ### for 4 dots
+            ### TODO figure out the calculate of offset
             boxes_tran = tf.stack([boxes[:, :, :, :, 0] * self.cell_size - offset,
                                    boxes[:, :, :, :, 1] * self.cell_size - tf.transpose(offset, (0, 2, 1, 3)),
-                                   tf.sqrt(boxes[:, :, :, :, 2]),
-                                   tf.sqrt(boxes[:, :, :, :, 3])])
+                                   boxes[:, :, :, :, 2] * self.cell_size - offset,
+                                   boxes[:, :, :, :, 3] * self.cell_size - tf.transpose(offset, (0, 2, 1, 3)),
+                                   boxes[:, :, :, :, 4] * self.cell_size - offset,
+                                   boxes[:, :, :, :, 5] * self.cell_size - tf.transpose(offset, (0, 2, 1, 3)),
+                                   boxes[:, :, :, :, 6] * self.cell_size - offset,
+                                   boxes[:, :, :, :, 7] * self.cell_size - tf.transpose(offset, (0, 2, 1, 3)),
+                                   ])
+
             boxes_tran = tf.transpose(boxes_tran, [1, 2, 3, 4, 0])
 
             # class_loss
             class_delta = response * (predict_classes - classes)
+
+            ## sum in axis [1, 2, 3], mean in axis 0
             class_loss = tf.reduce_mean(tf.reduce_sum(tf.square(class_delta), axis=[1, 2, 3]), name='class_loss') * self.class_scale
 
             # object_loss
@@ -182,6 +290,8 @@ class YOLONet(object):
             noobject_loss = tf.reduce_mean(tf.reduce_sum(tf.square(noobject_delta), axis=[1, 2, 3]), name='noobject_loss') * self.noobject_scale
 
             # coord_loss
+            ### coord_mask [batch_size, cell_size, cell_size, boxes_per_cell, 1]
+            ### predict_boxes [batch_size, cell_size, cell_size, boxes_per_cell, 8]
             coord_mask = tf.expand_dims(object_mask, 4)
             boxes_delta = coord_mask * (predict_boxes - boxes_tran)
             coord_loss = tf.reduce_mean(tf.reduce_sum(tf.square(boxes_delta), axis=[1, 2, 3, 4]), name='coord_loss') * self.coord_scale
@@ -196,10 +306,14 @@ class YOLONet(object):
             tf.summary.scalar('noobject_loss', noobject_loss)
             tf.summary.scalar('coord_loss', coord_loss)
 
-            tf.summary.histogram('boxes_delta_x', boxes_delta[:, :, :, :, 0])
-            tf.summary.histogram('boxes_delta_y', boxes_delta[:, :, :, :, 1])
-            tf.summary.histogram('boxes_delta_w', boxes_delta[:, :, :, :, 2])
-            tf.summary.histogram('boxes_delta_h', boxes_delta[:, :, :, :, 3])
+            tf.summary.histogram('boxes_delta_x1', boxes_delta[:, :, :, :, 0])
+            tf.summary.histogram('boxes_delta_y1', boxes_delta[:, :, :, :, 1])
+            tf.summary.histogram('boxes_delta_x2', boxes_delta[:, :, :, :, 2])
+            tf.summary.histogram('boxes_delta_y2', boxes_delta[:, :, :, :, 3])
+            tf.summary.histogram('boxes_delta_x3', boxes_delta[:, :, :, :, 4])
+            tf.summary.histogram('boxes_delta_y3', boxes_delta[:, :, :, :, 5])
+            tf.summary.histogram('boxes_delta_x4', boxes_delta[:, :, :, :, 6])
+            tf.summary.histogram('boxes_delta_y4', boxes_delta[:, :, :, :, 7])
             tf.summary.histogram('iou', iou_predict_truth)
 
 

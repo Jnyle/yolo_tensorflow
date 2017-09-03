@@ -4,13 +4,15 @@ import os
 # path and dataset parameter
 #
 
-DATA_PATH = 'data'
+DATA_PATH = '/home/dingjian/code/yolo_tensorflow/data'
 
 PASCAL_PATH = os.path.join(DATA_PATH, 'pascal_voc')
 
 CACHE_PATH = os.path.join(PASCAL_PATH, 'cache')
 
-OUTPUT_DIR = os.path.join(PASCAL_PATH, 'output')
+##OUTPUT_DIR = os.path.join(PASCAL_PATH, 'output')
+
+
 
 WEIGHTS_DIR = os.path.join(PASCAL_PATH, 'weights')
 
@@ -27,7 +29,10 @@ FLIPPED = True
 #
 # carplane dataset parameter
 #
-CARPLANE_PATH = os.path.join((DATA_PATH, 'carplane'))
+CARPLANE_PATH = os.path.join(DATA_PATH, 'carplane')
+
+OUTPUT_DIR = os.path.join(CARPLANE_PATH, 'output')
+
 CARPLANE_CLASSES = ['plane', 'car']
 #
 # model parameter
@@ -53,7 +58,7 @@ COORD_SCALE = 5.0
 # solver parameter
 #
 
-GPU = ''
+GPU = '0'
 
 LEARNING_RATE = 0.0001
 

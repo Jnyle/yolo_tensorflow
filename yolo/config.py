@@ -15,9 +15,10 @@ CACHE_PATH = os.path.join(PASCAL_PATH, 'cache')
 ##OUTPUT_DIR = os.path.join(PASCAL_PATH, 'output')
 
 
+CARPLANE_PATH = os.path.join(DATA_PATH, 'carplane')
+##WEIGHTS_DIR = os.path.join(PASCAL_PATH, 'weights')
 
-WEIGHTS_DIR = os.path.join(PASCAL_PATH, 'weights')
-
+WEIGHTS_DIR = os.path.join(CARPLANE_PATH, 'weights')
 WEIGHTS_FILE = None
 # WEIGHTS_FILE = os.path.join(DATA_PATH, 'weights', 'YOLO_small.ckpt')
 
@@ -31,7 +32,7 @@ FLIPPED = True
 #
 # carplane dataset parameter
 #
-CARPLANE_PATH = os.path.join(DATA_PATH, 'carplane')
+
 
 OUTPUT_DIR = os.path.join(CARPLANE_PATH, 'output')
 

@@ -51,6 +51,7 @@ class Solver(object):
         self.sess = tf.Session(config=config)
         self.sess.run(tf.global_variables_initializer())
 
+        print 'weights_file: ', self.weights_file
         if self.weights_file is not None:
             print('Restoring weights from: ' + self.weights_file)
             self.saver.restore(self.sess, self.weights_file)
@@ -124,10 +125,11 @@ class Solver(object):
 
 def update_config_paths(data_dir, weights_file):
     cfg.DATA_PATH = data_dir
-    cfg.PASCAL_PATH = os.path.join(data_dir, 'pascal_voc')
-    cfg.CACHE_PATH = os.path.join(cfg.PASCAL_PATH, 'cache')
-    cfg.OUTPUT_DIR = os.path.join(cfg.PASCAL_PATH, 'output')
-    cfg.WEIGHTS_DIR = os.path.join(cfg.PASCAL_PATH, 'weights')
+    ##cfg.PASCAL_PATH = os.path.join(data_dir, 'pascal_voc')
+    cfg.CARPLANE_PATH = os.path.join(data_dir, 'carplane')
+    cfg.CACHE_PATH = os.path.join(cfg.CARPLANE_PATH , 'cache')
+    cfg.OUTPUT_DIR = os.path.join(cfg.CARPLANE_PATH , 'output')
+    cfg.WEIGHTS_DIR = os.path.join(cfg.CARPLANE_PATH , 'weights')
 
     cfg.WEIGHTS_FILE = os.path.join(cfg.WEIGHTS_DIR, weights_file)
 
@@ -145,14 +147,15 @@ def main():
         cfg.GPU = args.gpu
 
     if args.data_dir != cfg.DATA_PATH:
-        print 'the data path maybe some wrong'
-        ##update_config_paths(args.data_dir, args.weights)
+        ##print 'the data path maybe some wrong'
+        update_config_paths(args.data_dir, args.weights)
 
     os.environ['CUDA_VISIBLE_DEVICES'] = cfg.GPU
 
     yolo = YOLONet()
     ##pascal = pascal_voc('train')
     carplane_data = carplane('train')
+
 
     solver = Solver(yolo, carplane_data)
 

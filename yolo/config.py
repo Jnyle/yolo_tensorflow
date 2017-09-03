@@ -4,7 +4,9 @@ import os
 # path and dataset parameter
 #
 
-DATA_PATH = '/home/dingjian/code/yolo_tensorflow/data'
+##DATA_PATH = '/home/dingjian/code/yolo_tensorflow/data'
+
+DATA_PATH = '/home/dj/gitcode/yolo_tensorflow/data'
 
 PASCAL_PATH = os.path.join(DATA_PATH, 'pascal_voc')
 

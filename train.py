@@ -66,7 +66,7 @@ class Solver(object):
         for step in xrange(1, self.max_iter + 1):
 
             load_timer.tic()
-            images, labels = self.data.get()
+            images, labels, imnames = self.data.get()
             load_timer.toc()
             feed_dict = {self.net.images: images, self.net.labels: labels}
 

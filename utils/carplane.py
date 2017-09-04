@@ -33,9 +33,11 @@ class carplane(object):
         images = np.zeros((self.batch_size, self.image_size, self.image_size, 3))
         #labels = np.zeros((self.batch_size, self.cell_size, self.cell_size, 25))
         labels = np.zeros((self.batch_size, self.cell_size, self.cell_size, 9 + 2))
+        imnames = []
         count = 0
         while count < self.batch_size:
             imname = self.gt_labels[self.cursor]['imname']
+            imnames.append(imname)
             flipped = self.gt_labels[self.cursor]['flipped']
             images[count, :, :, :] = self.image_read(imname, flipped)
             labels[count, :, :, :] = self.gt_labels[self.cursor]['label']
@@ -45,7 +47,7 @@ class carplane(object):
                 np.random.shuffle(self.gt_labels)
                 self.cursor = 0
                 self.epoch += 1
-        return images, labels
+        return images, labels, imnames
 
     def image_read(self, imname, flipped=False):
         image = cv2.imread(imname)

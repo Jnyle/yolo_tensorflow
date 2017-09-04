@@ -6,7 +6,9 @@ import os
 
 ##DATA_PATH = '/home/dingjian/code/yolo_tensorflow/data'
 
-DATA_PATH = '/home/dj/gitcode/yolo_tensorflow/data'
+##DATA_PATH = '/home/dj/gitcode/yolo_tensorflow/data'
+
+DATA_PATH = r'/home/dingjian/code/yolo_tensorflow/data'
 
 PASCAL_PATH = os.path.join(DATA_PATH, 'pascal_voc')
 
@@ -27,7 +29,7 @@ CLASSES = ['aeroplane', 'bicycle', 'bird', 'boat', 'bottle', 'bus',
            'motorbike', 'person', 'pottedplant', 'sheep', 'sofa',
            'train', 'tvmonitor']
 
-FLIPPED = True
+FLIPPED = False
 
 #
 # carplane dataset parameter

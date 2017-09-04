@@ -131,7 +131,8 @@ def update_config_paths(data_dir, weights_file):
     cfg.OUTPUT_DIR = os.path.join(cfg.CARPLANE_PATH , 'output')
     cfg.WEIGHTS_DIR = os.path.join(cfg.CARPLANE_PATH , 'weights')
 
-    cfg.WEIGHTS_FILE = os.path.join(cfg.WEIGHTS_DIR, weights_file)
+    if (weights_file != None):
+        cfg.WEIGHTS_FILE = os.path.join(cfg.WEIGHTS_DIR, weights_file)
 
 
 def main():

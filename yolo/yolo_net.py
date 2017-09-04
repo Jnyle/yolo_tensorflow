@@ -144,14 +144,14 @@ class YOLONet(object):
         with tf.variable_scope(scope):
             boxes1 = tf.stack([boxes1[:, :, :, :, 0],
                                boxes1[:, :, :, :, 1],
-                               boxes1[:, :, :, :, 6],
-                               boxes1[:, :, :, :, 7]])
+                               boxes1[:, :, :, :, 4],
+                               boxes1[:, :, :, :, 5]])
             boxes1 = tf.transpose(boxes1, [1, 2, 3, 4, 0])
 
             boxes2 = tf.stack([boxes2[:, :, :, :, 0],
                                boxes2[:, :, :, :, 1],
-                               boxes2[:, :, :, :, 6],
-                               boxes2[:, :, :, :, 7]])
+                               boxes2[:, :, :, :, 4],
+                               boxes2[:, :, :, :, 5]])
             boxes2 = tf.transpose(boxes2, [1, 2, 3, 4, 0])
 
             # calculate the left up point & right down point

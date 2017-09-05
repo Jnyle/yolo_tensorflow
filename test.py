@@ -231,7 +231,7 @@ class Detector(object):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--weights', default="data/carplane/output/2017_09_05_13_41/save.ckpt-1000", type=str)
+    parser.add_argument('--weights', default="data/carplane/output/2017_09_05_13_41/save.ckpt-2000", type=str)
     parser.add_argument('--weight_dir', default='weights', type=str)
     parser.add_argument('--data_dir', default="data", type=str)
     parser.add_argument('--gpu', default='', type=str)
@@ -249,7 +249,7 @@ def main():
     # detector.camera_detector(cap)
 
     # detect from image file
-    imname = '/home/dingjian/data/carplane/images/P0247_car.png'
+    imname = '/home/dingjian/data/carplane/images/P0188_plane.png'
     detector.image_detector(imname)
 
 

@@ -142,6 +142,11 @@ class YOLONet(object):
 
         x1 = np.zeros([self.batch_size, self.cell_size, self.cell_size, self.boxes_per_cell, 4])
         y1 = np.zeros([self.batch_size, self.cell_size, self.cell_size, self.boxes_per_cell, 4])
+        print 'box shape:', np.shape(boxes1)
+        print 'boxes:', boxes1
+
+        print 'x shape:', np.shape(x1)
+        print 'x:', x1
         for i in range(4):
             x1[:, :, :, :, i] = boxes1[:, :, :, :, 2 * i]
             y1[:, :, :, :, i] = boxes1[:, :, :, :, 2 * i + 1]

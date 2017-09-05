@@ -19,7 +19,7 @@ WEIGHTS_FILE = None
 # WEIGHTS_FILE = os.path.join(DATA_PATH, 'weights', 'YOLO_small.ckpt')
 
 CLASSES = ['plane', 'car']
-CARPLANE_CLASSES = ['plane', 'car']
+
 FLIPPED = False
 
 

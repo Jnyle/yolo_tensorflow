@@ -140,33 +140,33 @@ class YOLONet(object):
         return tf.clip_by_value(inter_square / union_square, 0.0, 1.0)
     def calc_iou_poly(self, boxes1, boxes2, scope='iou_poly'):
 
-        x1 = tf.zeros([self.batch_size, self.cell_size, self.cell_size, self.boxes_per_cell, 4])
-        y1 = tf.zeros([self.batch_size, self.cell_size, self.cell_size, self.boxes_per_cell, 4])
+        x1 = np.zeros([self.batch_size, self.cell_size, self.cell_size, self.boxes_per_cell, 4])
+        y1 = np.zeros([self.batch_size, self.cell_size, self.cell_size, self.boxes_per_cell, 4])
         print 'box shape:', np.shape(boxes1)
         print 'boxes:', boxes1
 
         print 'x shape:', np.shape(x1)
         print 'x:', x1
         for i in range(4):
-            x1[:, :, :, :, i] = boxes1[:, :, :, :, 2 * i]
-            y1[:, :, :, :, i] = boxes1[:, :, :, :, 2 * i + 1]
+            x1[:, :, :, :, i] = np.array(boxes1[:, :, :, :, 2 * i])
+            y1[:, :, :, :, i] = np.array(boxes1[:, :, :, :, 2 * i + 1])
 
         x2 = tf.zeros([self.batch_size, self.cell_size, self.cell_size, self.boxes_per_cell, 4])
         y2 = tf.zeros([self.batch_size, self.cell_size, self.cell_size, self.boxes_per_cell, 4])
         for i in range(4):
-            x2[:, :, :, :, i] = boxes2[:, :, :, :, 2 * i]
-            y2[:, :, :, :, i] = boxes2[:, :, :, :, 2 * i + 1]
+            x2[:, :, :, :, i] = np.array(boxes2[:, :, :, :, 2 * i])
+            y2[:, :, :, :, i] = np.array(boxes2[:, :, :, :, 2 * i + 1])
         with tf.variable_scope(scope):
-            boxes1 = tf.stack(np.min(x1),
-                               np.min(y1),
-                               np.max(x1),
-                               np.max(y1))
+            boxes1 = tf.stack(np.min(x1, axis=4),
+                               np.min(y1, axis=4),
+                               np.max(x1, axis=4),
+                               np.max(y1, axis=4))
             boxes1 = tf.transpose(boxes1, [1, 2, 3, 4, 0])
 
-            boxes2 = tf.stack(np.min(x2),
-                               np.min(y2),
-                               np.max(x2),
-                               np.max(y2))
+            boxes2 = tf.stack(np.min(x2, axis=4),
+                               np.min(y2, axis=4),
+                               np.max(x2, axis=4),
+                               np.max(y2, axis=4))
             boxes2 = tf.transpose(boxes2, [1, 2, 3, 4, 0])
 
             # calculate the left up point & right down point

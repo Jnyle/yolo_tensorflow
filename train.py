@@ -6,7 +6,7 @@ import yolo.config as cfg
 from yolo.yolo_net import YOLONet
 from utils.timer import Timer
 from utils.pascal_voc import pascal_voc
-
+from utils.carplane import carplane
 
 class Solver(object):
 
@@ -124,10 +124,10 @@ class Solver(object):
 
 def update_config_paths(data_dir, weights_file):
     cfg.DATA_PATH = data_dir
-    cfg.PASCAL_PATH = os.path.join(data_dir, 'pascal_voc')
-    cfg.CACHE_PATH = os.path.join(cfg.PASCAL_PATH, 'cache')
-    cfg.OUTPUT_DIR = os.path.join(cfg.PASCAL_PATH, 'output')
-    cfg.WEIGHTS_DIR = os.path.join(cfg.PASCAL_PATH, 'weights')
+    cfg.PASCAL_PATH = os.path.join(data_dir, 'carplane')
+    cfg.CACHE_PATH = os.path.join(cfg.CARPLANE_PATH, 'cache')
+    cfg.OUTPUT_DIR = os.path.join(cfg.CARPLANE_PATH, 'output')
+    cfg.WEIGHTS_DIR = os.path.join(cfg.CARPLANE_PATH, 'weights')
 
     cfg.WEIGHTS_FILE = os.path.join(cfg.WEIGHTS_DIR, weights_file)
 
@@ -144,15 +144,15 @@ def main():
     if args.gpu is not None:
         cfg.GPU = args.gpu
 
-    if args.data_dir != cfg.DATA_PATH:
-        update_config_paths(args.data_dir, args.weights)
+    #if args.data_dir != cfg.DATA_PATH:
+    update_config_paths(args.data_dir, args.weights)
 
     os.environ['CUDA_VISIBLE_DEVICES'] = cfg.GPU
 
     yolo = YOLONet()
-    pascal = pascal_voc('train')
+    carplane_data = carplane('train')
 
-    solver = Solver(yolo, pascal)
+    solver = Solver(yolo, carplane_data)
 
     print('Start training ...')
     solver.train()

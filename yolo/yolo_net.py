@@ -140,18 +140,28 @@ class YOLONet(object):
         return tf.clip_by_value(inter_square / union_square, 0.0, 1.0)
     def calc_iou_poly(self, boxes1, boxes2, scope='iou_poly'):
 
+        x1 = np.zeros(4)
+        y1 = np.zeros(4)
+        for i in range(4):
+            x1[i] = boxes1[:, :, :, :, 2 * i]
+            y1[i] = boxes1[:, :, :, :, 2 * i + 1]
 
+        x2 = np.zeros(4)
+        y2 = np.zeros(4)
+        for i in range(4):
+            x2[i] = boxes2[:, :, :, :, 2 * i]
+            y2[i] = boxes2[:, :, :, :, 2 * i + 1]
         with tf.variable_scope(scope):
-            boxes1 = tf.stack([boxes1[:, :, :, :, 0],
-                               boxes1[:, :, :, :, 1],
-                               boxes1[:, :, :, :, 4],
-                               boxes1[:, :, :, :, 5]])
+            boxes1 = tf.stack(np.min(x1),
+                               np.min(y1),
+                               np.max(x1),
+                               np.max(y1))
             boxes1 = tf.transpose(boxes1, [1, 2, 3, 4, 0])
 
-            boxes2 = tf.stack([boxes2[:, :, :, :, 0],
-                               boxes2[:, :, :, :, 1],
-                               boxes2[:, :, :, :, 4],
-                               boxes2[:, :, :, :, 5]])
+            boxes2 = tf.stack(np.min(x2),
+                               np.min(y2),
+                               np.max(x2),
+                               np.max(y2))
             boxes2 = tf.transpose(boxes2, [1, 2, 3, 4, 0])
 
             # calculate the left up point & right down point

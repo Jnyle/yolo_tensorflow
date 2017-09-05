@@ -86,6 +86,6 @@ SAVE_ITER = 1000
 # test parameter
 #
 
-THRESHOLD = 0.2
+THRESHOLD = 0.0000
 
 IOU_THRESHOLD = 0.5

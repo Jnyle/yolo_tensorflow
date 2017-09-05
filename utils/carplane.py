@@ -157,6 +157,7 @@ class carplane(object):
             w = max(min((float(bbox[11]) - 1) * w_ratio, self.image_size - 1), 0)
             h = max(min((float(bbox[12]) - 1) * h_ratio, self.image_size - 1), 0)
 
+
             x2 = x1 + w
             y2 = y1 + h
 

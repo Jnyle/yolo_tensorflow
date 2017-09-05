@@ -6,23 +6,21 @@ import os
 
 DATA_PATH = 'data'
 
-PASCAL_PATH = os.path.join(DATA_PATH, 'pascal_voc')
+#PASCAL_PATH = os.path.join(DATA_PATH, 'pascal_voc')
+CARPLANE_PATH = os.path.join(DATA_PATH, 'carplane')
 
-CACHE_PATH = os.path.join(PASCAL_PATH, 'cache')
+CACHE_PATH = os.path.join(CARPLANE_PATH, 'cache')
 
-OUTPUT_DIR = os.path.join(PASCAL_PATH, 'output')
+OUTPUT_DIR = os.path.join(CARPLANE_PATH, 'output')
 
-WEIGHTS_DIR = os.path.join(PASCAL_PATH, 'weights')
+WEIGHTS_DIR = os.path.join(CARPLANE_PATH, 'weights')
 
 WEIGHTS_FILE = None
 # WEIGHTS_FILE = os.path.join(DATA_PATH, 'weights', 'YOLO_small.ckpt')
 
-CLASSES = ['aeroplane', 'bicycle', 'bird', 'boat', 'bottle', 'bus',
-           'car', 'cat', 'chair', 'cow', 'diningtable', 'dog', 'horse',
-           'motorbike', 'person', 'pottedplant', 'sheep', 'sofa',
-           'train', 'tvmonitor']
-
-FLIPPED = True
+CLASSES = ['plane', 'car']
+CARPLANE_CLASSES = ['plane', 'car']
+FLIPPED = False
 
 
 #

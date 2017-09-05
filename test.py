@@ -6,7 +6,7 @@ import argparse
 import yolo.config as cfg
 from yolo.yolo_net import YOLONet
 from utils.timer import Timer
-
+from sympy.geometry import *
 
 class Detector(object):
 
@@ -73,14 +73,20 @@ class Detector(object):
                           self.boxes_per_cell, self.num_class))
         class_probs = np.reshape(output[0:self.boundary1], (self.cell_size, self.cell_size, self.num_class))
         scales = np.reshape(output[self.boundary1:self.boundary2], (self.cell_size, self.cell_size, self.boxes_per_cell))
-        boxes = np.reshape(output[self.boundary2:], (self.cell_size, self.cell_size, self.boxes_per_cell, 4))
+        boxes = np.reshape(output[self.boundary2:], (self.cell_size, self.cell_size, self.boxes_per_cell, 8))
         offset = np.transpose(np.reshape(np.array([np.arange(self.cell_size)] * self.cell_size * self.boxes_per_cell),
                                          [self.boxes_per_cell, self.cell_size, self.cell_size]), (1, 2, 0))
 
         boxes[:, :, :, 0] += offset
         boxes[:, :, :, 1] += np.transpose(offset, (1, 0, 2))
-        boxes[:, :, :, :2] = 1.0 * boxes[:, :, :, 0:2] / self.cell_size
-        boxes[:, :, :, 2:] = np.square(boxes[:, :, :, 2:])
+        boxes[:, :, :, 2] += offset
+        boxes[:, :, :, 3] += np.transpose(offset, (1, 0, 2))
+        boxes[:, :, :, 4] += offset
+        boxes[:, :, :, 5] += np.transpose(offset, (1, 0, 2))
+        boxes[:, :, :, 6] += offset
+        boxes[:, :, :, 7] += np.transpose(offset, (1, 0, 2))
+        #boxes[:, :, :, :2] = 1.0 * boxes[:, :, :, 0:2] / self.cell_size
+        #boxes[:, :, :, 2:] = np.square(boxes[:, :, :, 2:])
 
         boxes *= self.image_size
 
@@ -116,7 +122,7 @@ class Detector(object):
 
         result = []
         for i in range(len(boxes_filtered)):
-            result.append([self.classes[classes_num_filtered[i]], boxes_filtered[i][0], boxes_filtered[
+            result.append([self.classes[classes_num_filtered[i]],; boxes_filtered[i][0], boxes_filtered[
                           i][1], boxes_filtered[i][2], boxes_filtered[i][3], probs_filtered[i]])
 
         return result
@@ -132,6 +138,32 @@ class Detector(object):
             intersection = tb * lr
         return intersection / (box1[2] * box1[3] + box2[2] * box2[3] - intersection)
 
+    def iou_poly(self, box1, box2):
+
+        point = Point(box1[0], box1[1])
+        print point
+        p1, p2, p3, p4 = map(Point, [(box1[0], box1[1]), (box1[2], box1[3]), (box1[4], box1[5]), (box1[6], box1[7])])
+        poly1 = Polygon(p1, p2, p3, p4)
+        p5, p6, p7, p8 = map(Point, [(box2[0], box2[1]), (box2[2], box2[3]), (box2[4], box2[5]), (box2[6], box2[7])])
+        poly2 = Polygon(p5, p6, p7, p8)
+        poly1.intersection(poly2)
+
+        intersect = poly1.intersection(poly2)
+        if (len(intersect) == 3):
+            interpoly = Polygon(intersect[0], intersect[1], intersect[2])
+        elif (len(intersect) == 4):
+            interpoly = Polygon(intersect[0], intersect[1], intersect[2], intersect[3])
+        elif (len(intersect) == 5):
+            interpoly = Polygon(intersect[0], intersect[1], intersect[2], intersect[3], intersect[4])
+        elif (len(intersect) == 6):
+            interpoly = Polygon(intersect[0], intersect[1], intersect[2], intersect[3], intersect[4], intersect[5])
+        elif (len(intersect) == 7):
+            interpoly = Polygon(intersect[0], intersect[1], intersect[2], intersect[3], intersect[4], intersect[5], intersect[6])
+        elif (len(intersect) == 8):
+            interpoly = Polygon(intersect[0], intersect[1], intersect[2], intersect[3], intersect[4], intersect[5], intersect[6], intersect[7])
+        inter_square = interpoly.area
+        union_square = tf.maximum(poly1.area + poly2.area - inter_square, 1e-10)
+        return tf.clip_by_value(inter_square / union_square, 0.0, 1.0)
     def camera_detector(self, cap, wait=10):
         detect_timer = Timer()
         ret, _ = cap.read()
@@ -165,7 +197,7 @@ class Detector(object):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--weights', default="YOLO_small.ckpt", type=str)
+    parser.add_argument('--weights', default="data/carplane/output/2017_09_04_22_21/save.ckpt-15000", type=str)
     parser.add_argument('--weight_dir', default='weights', type=str)
     parser.add_argument('--data_dir', default="data", type=str)
     parser.add_argument('--gpu', default='', type=str)
@@ -174,7 +206,8 @@ def main():
     os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
 
     yolo = YOLONet(False)
-    weight_file = os.path.join(args.data_dir, args.weight_dir, args.weights)
+    ##weight_file = os.path.join(args.data_dir, args.weight_dir, args.weights)
+    weight_file = args.weights
     detector = Detector(yolo, weight_file)
 
     # detect from camera

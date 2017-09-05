@@ -142,25 +142,26 @@ class YOLONet(object):
 
 
 
-        x1 = tf.stack([boxes1[:, :, :, :, 0],
+        x1 = tf.stack(boxes1[:, :, :, :, 0],
                       boxes1[:, :, :, :, 2],
                       boxes1[:, :, :, :, 4],
-                      boxes1[:, :, :, :, 6] ], axis=4)
-
-        y1 = tf.stack([boxes1[:, :, :, :, 1],
+                      boxes1[:, :, :, :, 6] )
+        x1 = tf.transpose(x1, [1, 2, 3, 4, 0])
+        y1 = tf.stack(boxes1[:, :, :, :, 1],
                       boxes1[:, :, :, :, 3],
                       boxes1[:, :, :, :, 5],
-                      boxes1[:, :, :, :, 7] ], axis=4)
-        x2 = tf.stack([boxes2[:, :, :, :, 0],
+                      boxes1[:, :, :, :, 7] )
+        y1 = tf.transpose(y1, [1, 2, 3, 4, 0])
+        x2 = tf.stack(boxes2[:, :, :, :, 0],
                       boxes2[:, :, :, :, 2],
                       boxes2[:, :, :, :, 4],
-                      boxes2[:, :, :, :, 6] ], axis=4)
-
-        y2 = tf.stack([boxes2[:, :, :, :, 1],
+                      boxes2[:, :, :, :, 6] )
+        x2 = tf.transpose(x2, [1, 2, 3, 4, 0])
+        y2 = tf.stack(boxes2[:, :, :, :, 1],
                       boxes2[:, :, :, :, 3],
                       boxes2[:, :, :, :, 5],
-                      boxes2[:, :, :, :, 7]],  axis=4)
-
+                      boxes2[:, :, :, :, 7])
+        y2 = tf.transpose(y2, [1, 2, 3, 4, 0])
         with tf.variable_scope(scope):
             boxes1 = tf.stack(np.min(x1, axis=4),
                                np.min(y1, axis=4),

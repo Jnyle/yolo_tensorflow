@@ -140,8 +140,8 @@ class YOLONet(object):
         return tf.clip_by_value(inter_square / union_square, 0.0, 1.0)
     def calc_iou_poly(self, boxes1, boxes2, scope='iou_poly'):
 
-        x1 = np.zeros([self.batch_size, self.cell_size, self.cell_size, self.boxes_per_cell, 4])
-        y1 = np.zeros([self.batch_size, self.cell_size, self.cell_size, self.boxes_per_cell, 4])
+        x1 = tf.zeros([self.batch_size, self.cell_size, self.cell_size, self.boxes_per_cell, 4])
+        y1 = tf.zeros([self.batch_size, self.cell_size, self.cell_size, self.boxes_per_cell, 4])
         print 'box shape:', np.shape(boxes1)
         print 'boxes:', boxes1
 
@@ -151,8 +151,8 @@ class YOLONet(object):
             x1[:, :, :, :, i] = boxes1[:, :, :, :, 2 * i]
             y1[:, :, :, :, i] = boxes1[:, :, :, :, 2 * i + 1]
 
-        x2 = np.zeros([self.batch_size, self.cell_size, self.cell_size, self.boxes_per_cell, 4])
-        y2 = np.zeros([self.batch_size, self.cell_size, self.cell_size, self.boxes_per_cell, 4])
+        x2 = tf.zeros([self.batch_size, self.cell_size, self.cell_size, self.boxes_per_cell, 4])
+        y2 = tf.zeros([self.batch_size, self.cell_size, self.cell_size, self.boxes_per_cell, 4])
         for i in range(4):
             x2[:, :, :, :, i] = boxes2[:, :, :, :, 2 * i]
             y2[:, :, :, :, i] = boxes2[:, :, :, :, 2 * i + 1]
